@@ -80,15 +80,14 @@ bash -n bin/*.sh tests/*.sh
 bash tests/test_checkpoint.sh
 ```
 
-The portable suite uses **synthetic fixtures** under a disposable temporary directory; no real Mac diagnostics are checked into the repository. CI runs on Linux. Validation on macOS 11.7 requires running the documented commands on a real Mac and reviewing any BSD `du` differences before a release is declared stable.
+The portable suite uses **synthetic fixtures** in a uniquely created directory beneath `TMPDIR` (default: `/tmp`). The test runner creates small example files, removes only its own fixture directory and symlink at exit, and does not inspect or modify real Mac backups, containers, or projects. **Unlike the diagnostic commands, the test suite does write and delete disposable test files.** On a critically full Mac, prefer the GitHub Actions Linux test run rather than executing the fixture suite locally. No real Mac diagnostics are checked into this repository. Validation on macOS 11.7 requires running the read-only diagnostic commands on a real Mac and reviewing BSD `du` differences before a release is declared stable.
 
-## Safety contract
+## Operational boundaries
 
-1. **Measure**: collect precise, scoped evidence, with partial failures clearly identified.
-2. **Reconcile**: distinguish physical APFS allocation from directory sizes and sparse file maxima.
-3. **Propose**: name exact targets, expected recoverable space, backup/restore plan, and risks.
-4. **Apply only with separately scoped approval**: no operation in this repository performs cleanup.
+The two `bin/` entry points perform **measurement only**. They do not invoke cleanup, move or delete files, contact cloud services, request administrative privileges, or write reports. Shell-based measurements may still cause filesystem reads and may be incomplete because of permissions, snapshots, sparse files, or APFS clones.
 
-Protect device backups, Photos libraries, cloud placeholders, Docker volumes, project files, and system snapshots. No secret keys or production diagnostic exports belong in this public repository.
+Reclamation planning is **outside the scope of this repository**. Before any separately authorized cleanup, the specific source paths, expected recoverable bytes, backup/restore validation, and risks need independent review. Device backups, Photos libraries, cloud placeholders, Docker volumes, project files, and system snapshots are protected by default; no cleanup capability is implemented here.
+
+This public source tree contains no secret keys or machine-specific diagnostic exports. An operator should keep raw paths, device identifiers, and reports local unless deliberately sanitized.
 
 Licensed under MIT. See `LICENSE`.
