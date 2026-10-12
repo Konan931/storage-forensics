@@ -1,0 +1,21 @@
+name: Controlled cache cleaner fixtures
+on:
+  pull_request:
+  push:
+    branches: ['dwp/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fixtures:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-14]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python3 -m unittest discover -s tests -p 'test_cache_cleaner.py' -v
