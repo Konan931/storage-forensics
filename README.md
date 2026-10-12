@@ -1,8 +1,8 @@
 # DWP Storage Forensics
 
-**Read-only, evidence-first storage and memory diagnostics for macOS.**
+**Evidence-first storage diagnostics and a separate, explicitly approved cache cleaner for macOS.**
 
-This project targets small, heavily used APFS systems, including older Intel Macs running macOS 11.x. It is not a disk cleaner and **does not delete data**. We prioritize finding the *largest measured directories* before considering any proposed cleanup.
+This project targets small, heavily used APFS systems, including older Intel Macs running macOS 11.x. The diagnostic shell commands **do not delete data**. The separate Python cache cleaner can delete explicitly confirmed pip HTTP cache files; see [the cleanup guide](docs/cache-cleaner.md). We prioritize finding the *largest measured directories* before considering any proposed cleanup.
 
 > Status: **v1.2.0 / review candidate**. Portable shell tests run on Linux, but full compatibility must still be verified on an actual macOS 11.7 machine. A successful `du` walk is not proof that APFS accounting has been fully reconciled.
 
@@ -24,7 +24,7 @@ bash bin/dwp-hotspots.sh --path "$HOME/Library/Containers" --depth 1 --limit 20
 
 On macOS, `du -a` and `du -d` are mutually exclusive. The scanner deliberately makes one directory walk plus a shallow direct-file pass, and streams the top-N ranking without disk-backed sort files. The reported root total includes all deeper files.
 
-The tool never needs `sudo`, network access, Homebrew, Python, a database, Docker daemon access, or any cloud tokens. Do not paste raw path listings or device identifiers into public issues.
+The diagnostic shell tools never need `sudo`, network access, Homebrew, Python, a database, Docker daemon access, or any cloud tokens. Do not paste raw path listings or device identifiers into public issues.
 
 ## Commands
 
@@ -84,9 +84,9 @@ The portable suite uses **synthetic fixtures** in a uniquely created directory b
 
 ## Operational boundaries
 
-The two `bin/` entry points perform **measurement only**. They do not invoke cleanup, move or delete files, contact cloud services, request administrative privileges, or write reports. Shell-based measurements may still cause filesystem reads and may be incomplete because of permissions, snapshots, sparse files, or APFS clones.
+The two diagnostic shell entry points perform **measurement only**. They do not invoke cleanup, move or delete files, contact cloud services, request administrative privileges, or write reports. Shell-based measurements may still cause filesystem reads and may be incomplete because of permissions, snapshots, sparse files, or APFS clones.
 
-Reclamation planning is **outside the scope of this repository**. Before any separately authorized cleanup, the specific source paths, expected recoverable bytes, backup/restore validation, and risks need independent review. Device backups, Photos libraries, cloud placeholders, Docker volumes, project files, and system snapshots are protected by default; no cleanup capability is implemented here.
+The separate `python3 bin/dwp-cache-clean.py` command is a **draft cleanup extension**. It defaults to preview and accepts only two fixed pip HTTP cache targets. Each file deletion requires interactive approval. See [requirements, exact targets, safeguards, race limitations and APFS accounting](docs/cache-cleaner.md). Python 3.8+ is required for this command only. Real Big Sur validation is still pending.
 
 This public source tree contains no secret keys or machine-specific diagnostic exports. An operator should keep raw paths, device identifiers, and reports local unless deliberately sanitized.
 
